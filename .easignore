@@ -1,0 +1,7 @@
+.Trash
+**/.Trash
+node_modules
+.git
+.expo
+dist
+web-build
