@@ -4,4 +4,4 @@ node_modules
 .git
 .expo
 dist
-web-build
+web-build c

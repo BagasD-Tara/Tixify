@@ -1,95 +1,122 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { styles } from "@/styles/index.styles";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-// 1. Menerapkan Type (Interface)
+// 1. Tipe data Movie
 interface Movie {
   id: string;
   title: string;
   genre: string;
   price: number;
+  description: string;
 }
 
-// 2. Menerapkan Array of Objects (Data Dummy)
-const movies: Movie[] = [
-  { id: "1", title: "Violet Evagarden", genre: "Drama", price: 45000 },
-  { id: "2", title: "One Piece Film: Red", genre: "Fantasy", price: 45000 },
-  { id: "3", title: "Dr. Stone: The Movie", genre: "Anime/Sci-Fi", price: 45000 }
+// Data awal film (lengkap dengan deskripsi singkat)
+const initialMovies: Movie[] = [
+  {
+    id: "1",
+    title: "Violet Evergarden",
+    genre: "Drama",
+    price: 45000,
+    description:
+      "Kisah mantan prajurit wanita yang belajar memahami perasaan dan arti cinta melalui pekerjaannya menulis surat.",
+  },
+  {
+    id: "2",
+    title: "One Piece Film: Red",
+    genre: "Fantasy",
+    price: 45000,
+    description:
+      "Uta, diva paling dicintai di dunia, mengadakan konser live perdana yang mengejutkan seluruh dunia bajak laut.",
+  },
+  {
+    id: "3",
+    title: "Dr. Stone: The Movie",
+    genre: "Anime/Sci-Fi",
+    price: 45000,
+    description:
+      "Senku dan teman-temannya berusaha membangkitkan kembali peradaban manusia dari era batu menggunakan kekuatan sains.",
+  },
+  {
+    id: "4",
+    title: "Wuthering Waves",
+    genre: "Fantasy",
+    price: 50000,
+    description:
+      "Petualangan melintasi dunia terbuka pasca-bencana untuk mencari kembali ingatan dan menghadapi musuh baru.",
+  },
+  {
+    id: "5",
+    title: "Bagas Dewantara",
+    genre: "Mahasiswa",
+    price: 202410370110441,
+    description: "Wujud asli mahasiswa nyawit yang ingin tidur",
+  },
+  {
+    id: "6",
+    title: "Mantap Mas",
+    genre: "Action/Comedy",
+    price: 500000,
+    description:
+      "Film aksi komedi tentang kehidupan sehari-hari yang seru dan penuh kejutan tak terduga.",
+  },
 ];
 
 export default function Index() {
-  
-  // 3. Menerapkan Custom Function (Buat nyetak desain card 1 film)
-  const renderMovieCard = (movie: Movie) => {
-    return (
-      <View key={movie.id} style={styles.card}>
-        <View style={styles.textContainer}>
-          <Text style={styles.movieTitle}>{movie.title}</Text>
-          <Text style={styles.movieInfo}>Genre: {movie.genre}</Text>
-        </View>
-        
-        {/* Sisipan Inline Style biar asisten praktikum tahu kamu paham cara pakainya */}
-        <View style={{ backgroundColor: '#0ea5e9', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8 }}>
-          <Text style={styles.moviePrice}>Rp {movie.price}</Text>
-        </View>
-      </View>
-    );
+  const router = useRouter();
+
+  // 1. Penerapan hook useState
+  const [movies, setMovies] = useState<Movie[]>([]);
+
+  // 2. Penerapan hook useEffect
+  useEffect(() => {
+    // Memasukkan data awal film saat halaman pertama kali dimuat
+    setMovies(initialMovies);
+  }, []);
+
+  // 3. Penerapan router.push() untuk berpindah ke halaman detail
+  const goToDetail = (movie: Movie) => {
+    router.push({
+      pathname: "/detail",
+      params: {
+        id: movie.id,
+        title: movie.title,
+        genre: movie.genre,
+        price: movie.price.toString(),
+        description: movie.description,
+      },
+    });
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.headerText}>Tixify - Sedang Tayang</Text>
-      
-      {/* ScrollView biar kalau list filmnya nambah, layarnya bisa di-scroll */}
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* 4. Menerapkan Loop (Manggil data array movies satu per satu) */}
-        {movies.map((movie) => renderMovieCard(movie))}
+
+      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+        {movies.map((movie) => (
+          <View key={movie.id} style={styles.card}>
+            <View style={styles.textContainer}>
+              {/* Nama film bisa diklik untuk pindah ke halaman detail */}
+              <TouchableOpacity onPress={() => goToDetail(movie)}>
+                <Text style={styles.movieTitle}>{movie.title} ↗</Text>
+              </TouchableOpacity>
+              <Text style={styles.movieInfo}>Genre: {movie.genre}</Text>
+            </View>
+
+            <View
+              style={{
+                backgroundColor: "#e9a40e",
+                paddingVertical: 6,
+                paddingHorizontal: 12,
+                borderRadius: 8,
+              }}
+            >
+              <Text style={styles.moviePrice}>Rp {movie.price}</Text>
+            </View>
+          </View>
+        ))}
       </ScrollView>
     </View>
   );
 }
-
-// 5. Menerapkan External Styling (Tema Bioskop Modern / Dark Mode)
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#0f172a", // Latar belakang gelap navy
-  },
-  headerText: {
-    fontSize: 26,
-    fontWeight: "900",
-    marginBottom: 25,
-    marginTop: 20,
-    color: "#f8fafc",
-    letterSpacing: 0.5,
-  },
-  card: {
-    backgroundColor: "#1e293b", // Warna card kontras dengan background
-    padding: 18,
-    borderRadius: 14,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#334155",
-    flexDirection: "row", // Bikin elemen rata kiri-kanan
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  textContainer: {
-    flex: 1,
-    paddingRight: 10, // Biar judul panjang gak nabrak kotak harga
-  },
-  movieTitle: {
-    fontSize: 17,
-    fontWeight: "bold",
-    color: "#f1f5f9",
-    marginBottom: 4,
-  },
-  movieInfo: {
-    fontSize: 14,
-    color: "#94a3b8",
-  },
-  moviePrice: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#ffffff",
-  }
-});
