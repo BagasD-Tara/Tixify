@@ -3,7 +3,16 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-// 1. Tipe data Movie
+// 1. Interface untuk data mentah dari External API
+interface ApiFilm {
+  id: string;
+  title: string;
+  description: string;
+  director: string;
+  release_date: string;
+}
+
+// 2. Interface untuk Object Movie
 interface Movie {
   id: string;
   title: string;
@@ -12,70 +21,60 @@ interface Movie {
   description: string;
 }
 
-// Data awal film (lengkap dengan deskripsi singkat)
-const initialMovies: Movie[] = [
-  {
-    id: "1",
-    title: "Violet Evergarden",
-    genre: "Drama",
-    price: 45000,
-    description:
-      "Kisah mantan prajurit wanita yang belajar memahami perasaan dan arti cinta melalui pekerjaannya menulis surat.",
-  },
-  {
-    id: "2",
-    title: "One Piece Film: Red",
-    genre: "Fantasy",
-    price: 45000,
-    description:
-      "Uta, diva paling dicintai di dunia, mengadakan konser live perdana yang mengejutkan seluruh dunia bajak laut.",
-  },
-  {
-    id: "3",
-    title: "Dr. Stone: The Movie",
-    genre: "Anime/Sci-Fi",
-    price: 45000,
-    description:
-      "Senku dan teman-temannya berusaha membangkitkan kembali peradaban manusia dari era batu menggunakan kekuatan sains.",
-  },
-  {
-    id: "4",
-    title: "Wuthering Waves",
-    genre: "Fantasy",
-    price: 50000,
-    description:
-      "Petualangan melintasi dunia terbuka pasca-bencana untuk mencari kembali ingatan dan menghadapi musuh baru.",
-  },
-  {
-    id: "5",
-    title: "Bagas Dewantara",
-    genre: "Mahasiswa",
-    price: 202410370110441,
-    description: "Wujud asli mahasiswa nyawit yang ingin tidur",
-  },
-  {
-    id: "6",
-    title: "Mantap Mas",
-    genre: "Action/Comedy",
-    price: 500000,
-    description:
-      "Film aksi komedi tentang kehidupan sehari-hari yang seru dan penuh kejutan tak terduga.",
-  },
-];
+const API_URL = "https://ghibliapi.vercel.app/films";
+
+// 3. Custom Async Function menggunakan Pre-built Async Function (fetch),
+//    Promise.resolve(), dan Promise.reject()
+const fetchMovies = async (): Promise<Movie[]> => {
+  try {
+    const response = await fetch(API_URL);
+
+    if (!response.ok) {
+      return Promise.reject(
+        new Error(`Gagal mengambil data API (status: ${response.status})`)
+      );
+    }
+
+    const data: ApiFilm[] = await response.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      return Promise.reject(new Error("Data film kosong"));
+    }
+
+    // Memasukkan data dari External API ke dalam Object menggunakan Interface Movie
+    const mappedMovies: Movie[] = data.map((item, index) => {
+      const movieObject: Movie = {
+        id: item.id,
+        title: item.title,
+        genre: `Animation (${item.release_date})`,
+        price: 45000 + (index % 3) * 5000,
+        description: item.description,
+      };
+      return movieObject;
+    });
+
+    return Promise.resolve(mappedMovies);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
 
 export default function Index() {
   const router = useRouter();
 
-  // 1. Penerapan hook useState
   const [movies, setMovies] = useState<Movie[]>([]);
 
-  // 2. Penerapan hook useEffect
+  // 4. Memanggil Custom Async Function dengan .then()
   useEffect(() => {
-    // Memasukkan data awal film saat halaman pertama kali dimuat
-    setMovies(initialMovies);
+    fetchMovies()
+      .then((result) => {
+        setMovies(result);
+      })
+      .catch((error) => {
+        console.error("Gagal memuat film:", error);
+      });
   }, []);
 
-  // 3. Penerapan router.push() untuk berpindah ke halaman detail
   const goToDetail = (movie: Movie) => {
     router.push({
       pathname: "/detail",
@@ -97,7 +96,6 @@ export default function Index() {
         {movies.map((movie) => (
           <View key={movie.id} style={styles.card}>
             <View style={styles.textContainer}>
-              {/* Nama film bisa diklik untuk pindah ke halaman detail */}
               <TouchableOpacity onPress={() => goToDetail(movie)}>
                 <Text style={styles.movieTitle}>{movie.title} ↗</Text>
               </TouchableOpacity>
@@ -120,3 +118,10 @@ export default function Index() {
     </View>
   );
 }
+
+//case 1: ganti tujuan page dari sebuah button yang menggunakan push function atau link
+//case 2: refactor salah satu nama dari state variable dan pastikan program nya jalan
+//case 3: buatkan page biasa bernama profile.tsx dan pastikan bisa diakses lewat expo router
+
+//nama : bagas dewantara
+//nim : 202410370110441
