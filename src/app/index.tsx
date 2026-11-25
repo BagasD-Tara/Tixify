@@ -1,5 +1,5 @@
 import { styles } from "@/styles/index.styles";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
@@ -31,7 +31,7 @@ const fetchMovies = async (): Promise<Movie[]> => {
 
     if (!response.ok) {
       return Promise.reject(
-        new Error(`Gagal mengambil data API (status: ${response.status})`)
+        new Error(`Gagal mengambil data API (status: ${response.status})`),
       );
     }
 
@@ -91,6 +91,9 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <Text style={styles.headerText}>Tixify - Sedang Tayang</Text>
+      <Link href="/profile" style={{ color: "#38bdf8", marginBottom: 12 }}>
+        Lihat Pengguna →
+      </Link>
 
       <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
         {movies.map((movie) => (
@@ -119,9 +122,4 @@ export default function Index() {
   );
 }
 
-//case 1: ganti tujuan page dari sebuah button yang menggunakan push function atau link
-//case 2: refactor salah satu nama dari state variable dan pastikan program nya jalan
-//case 3: buatkan page biasa bernama profile.tsx dan pastikan bisa diakses lewat expo router
 
-//nama : bagas dewantara
-//nim : 202410370110441
